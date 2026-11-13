@@ -2,8 +2,8 @@
   <!-- Central Package Management: every NuGet version lives here, so upgrades are a one-file change. -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <AspNetCoreVersion>10.0.0</AspNetCoreVersion>
-    <EfCoreVersion>10.0.0</EfCoreVersion>
+    <AspNetCoreVersion>11.0.0</AspNetCoreVersion>
+    <EfCoreVersion>10.0.15</EfCoreVersion>
   </PropertyGroup>
   <ItemGroup Label="Application">
     <PackageVersion Include="FluentValidation" Version="12.0.0" />
@@ -28,7 +28,7 @@
   <ItemGroup Label="Tests">
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(AspNetCoreVersion)" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.4.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
