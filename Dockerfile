@@ -17,7 +17,7 @@ COPY src/ src/
 RUN dotnet publish src/SpendSmart.Web/SpendSmart.Web.csproj -c Release -o /app --no-restore /p:UseAppHost=false
 
 # ---- runtime ----
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS runtime
 WORKDIR /app
 ENV ASPNETCORE_HTTP_PORTS=8080 \
     ASPNETCORE_ENVIRONMENT=Production
