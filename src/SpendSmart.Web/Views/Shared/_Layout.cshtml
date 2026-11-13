@@ -1,0 +1,86 @@
+@{
+    var signedIn = User.Identity?.IsAuthenticated == true;
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    string Active(string name) => string.Equals(controller, name, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="SpendSmart – track expenses, set budgets and see where your money goes." />
+    <title>@ViewData["Title"] · SpendSmart</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <header>
+        <nav class="navbar navbar-expand-md navbar-dark bg-ss shadow-sm">
+            <div class="container">
+                <a class="navbar-brand fw-semibold" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-piggy-bank"></i> SpendSmart
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                        aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    @if (signedIn)
+                    {
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item"><a class="nav-link @Active("Home")" asp-controller="Home" asp-action="Index">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("Expenses")" asp-controller="Expenses" asp-action="Index">Expenses</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("Budgets")" asp-controller="Budgets" asp-action="Index">Budgets</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("Recurring")" asp-controller="Recurring" asp-action="Index">Recurring</a></li>
+                            <li class="nav-item"><a class="nav-link @Active("Categories")" asp-controller="Categories" asp-action="Index">Categories</a></li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <ul class="navbar-nav me-auto"></ul>
+                    }
+                    <ul class="navbar-nav align-items-md-center">
+                        <li class="nav-item"><a class="nav-link" href="/swagger"><i class="bi bi-braces"></i> API</a></li>
+                        @if (signedIn)
+                        {
+                            <li class="nav-item"><span class="navbar-text small mx-2 text-white-50">@User.Identity!.Name</span></li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-light">Sign out</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login">Sign in</a></li>
+                            <li class="nav-item"><a class="btn btn-sm btn-light ms-md-2" asp-controller="Account" asp-action="Register">Create account</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="container py-4 flex-grow-1">
+        <partial name="_Flash" />
+        @RenderBody()
+    </main>
+
+    <footer class="border-top py-3 text-muted small bg-white">
+        <div class="container d-flex flex-wrap justify-content-between gap-2">
+            <span>&copy; @DateTime.UtcNow.Year SpendSmart</span>
+            <span>
+                <a href="/swagger">API docs</a> ·
+                <a href="/health">Health</a> ·
+                <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </span>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

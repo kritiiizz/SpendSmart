@@ -1,0 +1,43 @@
+@model CategoriesViewModel
+@{
+    ViewData["Title"] = "Categories";
+}
+<h1 class="h3 mb-3">Categories</h1>
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card">
+            <ul class="list-group list-group-flush">
+                @foreach (var c in Model.Categories)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><span class="category-dot" style="background:@c.Color"></span>@c.Name</span>
+                        @await Html.PartialAsync("_ConfirmDelete", ("Categories", c.Id, $"the category '{c.Name}'"))
+                    </li>
+                }
+            </ul>
+        </div>
+        <p class="small text-muted mt-2">Categories that are used by expenses, budgets or recurring expenses can't be deleted.</p>
+    </div>
+    <div class="col-lg-5">
+        <div class="card p-3">
+            <h2 class="h6">Add a category</h2>
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" maxlength="50" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Color" class="form-label">Chart colour</label>
+                    <input asp-for="Color" type="color" class="form-control form-control-color" />
+                    <span asp-validation-for="Color" class="text-danger small"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Add</button>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

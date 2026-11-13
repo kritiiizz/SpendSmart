@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Track spending, stay on budget";
+}
+<section class="hero p-4 p-md-5 mb-5">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <h1 class="display-5 fw-semibold">Know where your money goes.</h1>
+            <p class="lead mb-4">
+                SpendSmart tracks your expenses, warns you before you blow a budget, and books rent and
+                subscriptions automatically.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <form asp-controller="Account" asp-action="Demo" method="post">
+                    <button type="submit" class="btn btn-light btn-lg"><i class="bi bi-play-circle"></i> Try the demo</button>
+                </form>
+                <a class="btn btn-outline-light btn-lg" asp-controller="Account" asp-action="Register">Create an account</a>
+            </div>
+            <p class="small mt-3 mb-0 text-white-50">The demo account has six months of sample data. No sign-up needed.</p>
+        </div>
+        <div class="col-lg-5 text-center d-none d-lg-block">
+            <i class="bi bi-graph-up-arrow" style="font-size: 9rem; opacity: .85"></i>
+        </div>
+    </div>
+</section>
+
+<section class="row g-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 p-3">
+            <i class="bi bi-pie-chart feature-icon"></i>
+            <h2 class="h5 mt-2">Dashboard</h2>
+            <p class="text-muted mb-0">Spending by category and a six-month trend, compared with last month.</p>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 p-3">
+            <i class="bi bi-bell feature-icon"></i>
+            <h2 class="h5 mt-2">Budget alerts</h2>
+            <p class="text-muted mb-0">Set a monthly limit per category and get a warning at 80%.</p>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 p-3">
+            <i class="bi bi-arrow-repeat feature-icon"></i>
+            <h2 class="h5 mt-2">Recurring expenses</h2>
+            <p class="text-muted mb-0">Rent and subscriptions are added for you by a background job.</p>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 p-3">
+            <i class="bi bi-braces feature-icon"></i>
+            <h2 class="h5 mt-2">REST API</h2>
+            <p class="text-muted mb-0">Everything is available over a JWT-secured API. <a href="/swagger">Try it in Swagger</a>.</p>
+        </div>
+    </div>
+</section>

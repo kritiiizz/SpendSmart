@@ -1,0 +1,7 @@
+@* Delete is always a POST with an anti-forgery token. Usage: @await Html.PartialAsync("_ConfirmDelete", ("Expenses", id, "this expense")) *@
+@model (string Controller, int Id, string What)
+<form asp-controller="@Model.Controller" asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline"
+      onsubmit="return confirm('Delete @Model.What? This can\'t be undone.');">
+    <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
+    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
+</form>
