@@ -6,8 +6,8 @@
     <EfCoreVersion>10.0.0</EfCoreVersion>
   </PropertyGroup>
   <ItemGroup Label="Application">
-    <PackageVersion Include="FluentValidation" Version="12.0.0" />
-    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+    <PackageVersion Include="FluentValidation" Version="12.2.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="$(AspNetCoreVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(AspNetCoreVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(AspNetCoreVersion)" />
