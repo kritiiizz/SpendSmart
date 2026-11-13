@@ -403,3 +403,8 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+# Local env / secrets
+.env
+appsettings.*.local.json
+TestResults/
+coverage/

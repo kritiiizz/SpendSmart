@@ -1,0 +1,145 @@
+@model ExpenseListViewModel
+@{
+    ViewData["Title"] = "Expenses";
+    var q = Model.Query;
+    var r = Model.Result;
+
+    // Builds a link to another page (or sort order) while keeping the current filters.
+    Dictionary<string, string> Route(int? page = null, ExpenseSortBy? sortBy = null, SortDirection? direction = null)
+    {
+        var values = new Dictionary<string, string>
+        {
+            ["page"] = (page ?? q.Page).ToString(CultureInfo.InvariantCulture),
+            ["pageSize"] = q.PageSize.ToString(CultureInfo.InvariantCulture),
+            ["sortBy"] = (sortBy ?? q.SortBy).ToString(),
+            ["sortDirection"] = (direction ?? q.SortDirection).ToString(),
+        };
+        if (q.CategoryId is { } c) values["categoryId"] = c.ToString(CultureInfo.InvariantCulture);
+        if (q.From is { } f) values["from"] = f.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        if (q.To is { } t) values["to"] = t.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        if (!string.IsNullOrWhiteSpace(q.Search)) values["search"] = q.Search;
+        return values;
+    }
+
+    Dictionary<string, string> SortRoute(ExpenseSortBy column) =>
+        Route(1, column, q.SortBy == column && q.SortDirection == SortDirection.Desc ? SortDirection.Asc : SortDirection.Desc);
+
+    string SortIcon(ExpenseSortBy column) => q.SortBy != column
+        ? ""
+        : q.SortDirection == SortDirection.Asc ? "bi-caret-up-fill" : "bi-caret-down-fill";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Expenses</h1>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add expense</a>
+</div>
+
+<form method="get" asp-action="Index" class="card p-3 mb-3" data-auto-submit>
+    <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small" for="search">Search</label>
+            <input id="search" name="search" value="@q.Search" class="form-control" placeholder="e.g. coffee" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small" for="categoryId">Category</label>
+            <select id="categoryId" name="categoryId" class="form-select">
+                <option value="">All categories</option>
+                @foreach (var c in Model.Categories)
+                {
+                    <option value="@c.Id" selected="@(q.CategoryId == c.Id)">@c.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label small" for="from">From</label>
+            <input id="from" name="from" type="date" value="@q.From?.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label small" for="to">To</label>
+            <input id="to" name="to" type="date" value="@q.To?.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary flex-grow-1"><i class="bi bi-funnel"></i> Filter</button>
+            <a asp-action="Index" class="btn btn-outline-secondary" title="Clear filters"><i class="bi bi-x-lg"></i></a>
+        </div>
+    </div>
+    <input type="hidden" name="sortBy" value="@q.SortBy" />
+    <input type="hidden" name="sortDirection" value="@q.SortDirection" />
+</form>
+
+@if (r.TotalCount == 0)
+{
+    <div class="card p-5 text-center text-muted">
+        <i class="bi bi-receipt" style="font-size: 2.5rem"></i>
+        <p class="mt-2 mb-3">No expenses match these filters.</p>
+        <div><a asp-action="Create" class="btn btn-primary">Add your first expense</a></div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th><a asp-action="Index" asp-all-route-data="SortRoute(ExpenseSortBy.Date)" class="text-reset text-decoration-none">Date <i class="bi @SortIcon(ExpenseSortBy.Date)"></i></a></th>
+                        <th><a asp-action="Index" asp-all-route-data="SortRoute(ExpenseSortBy.Description)" class="text-reset text-decoration-none">Description <i class="bi @SortIcon(ExpenseSortBy.Description)"></i></a></th>
+                        <th>Category</th>
+                        <th class="text-end"><a asp-action="Index" asp-all-route-data="SortRoute(ExpenseSortBy.Amount)" class="text-reset text-decoration-none">Amount <i class="bi @SortIcon(ExpenseSortBy.Amount)"></i></a></th>
+                        <th class="text-end"><span class="visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in r.Items)
+                    {
+                        <tr>
+                            <td class="text-nowrap">@e.Date.ToString("dd MMM yyyy", CultureInfo.InvariantCulture)</td>
+                            <td>
+                                @e.Description
+                                @if (e.IsRecurring)
+                                {
+                                    <i class="bi bi-arrow-repeat text-muted" title="Created from a recurring expense"></i>
+                                }
+                            </td>
+                            <td><span class="category-dot" style="background:@e.CategoryColor"></span>@e.CategoryName</td>
+                            <td class="text-end amount">@e.Amount.ToMoney()</td>
+                            <td class="text-end text-nowrap">
+                                <a asp-action="Edit" asp-route-id="@e.Id" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                                @await Html.PartialAsync("_ConfirmDelete", ("Expenses", e.Id, "this expense"))
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="table-light">
+                        <td colspan="3" class="text-muted small">
+                            Showing @((r.Page - 1) * r.PageSize + 1)–@((r.Page - 1) * r.PageSize + r.Items.Count) of @r.TotalCount
+                        </td>
+                        <td class="text-end amount fw-semibold">@Model.PageTotal.ToMoney()</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    @if (r.TotalPages > 1)
+    {
+        <nav class="mt-3" aria-label="Expense pages">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(r.HasPreviousPage ? "" : "disabled")">
+                    <a class="page-link" asp-action="Index" asp-all-route-data="Route(r.Page - 1)">Previous</a>
+                </li>
+                @for (var p = Math.Max(1, r.Page - 2); p <= Math.Min(r.TotalPages, r.Page + 2); p++)
+                {
+                    <li class="page-item @(p == r.Page ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-all-route-data="Route(p)">@p</a>
+                    </li>
+                }
+                <li class="page-item @(r.HasNextPage ? "" : "disabled")">
+                    <a class="page-link" asp-action="Index" asp-all-route-data="Route(r.Page + 1)">Next</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}

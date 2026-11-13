@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    REST API controllers, JWT auth and OpenAPI docs. Hosted by SpendSmart.Web so the demo is a single
+    deployable, but kept in its own project so it can be split into a separate service later.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\SpendSmart.Application\SpendSmart.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
+  </ItemGroup>
+</Project>

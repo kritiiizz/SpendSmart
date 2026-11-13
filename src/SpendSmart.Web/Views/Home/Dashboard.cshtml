@@ -1,0 +1,142 @@
+@model DashboardViewModel
+@{
+    var d = Model.Dashboard;
+    var month = Model.MonthStart;
+    var prev = month.AddMonths(-1);
+    var next = month.AddMonths(1);
+    var isCurrentMonth = month.Year == DateTime.UtcNow.Year && month.Month == DateTime.UtcNow.Month;
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <h1 class="h3 mb-0">@month.ToString("MMMM yyyy", CultureInfo.InvariantCulture)</h1>
+    <div class="btn-group" role="group" aria-label="Choose month">
+        <a class="btn btn-outline-secondary" asp-action="Index" asp-route-year="@prev.Year" asp-route-month="@prev.Month" title="Previous month"><i class="bi bi-chevron-left"></i></a>
+        <a class="btn btn-outline-secondary @(isCurrentMonth ? "disabled" : "")" asp-action="Index">This month</a>
+        <a class="btn btn-outline-secondary @(isCurrentMonth ? "disabled" : "")" asp-action="Index" asp-route-year="@next.Year" asp-route-month="@next.Month" title="Next month"><i class="bi bi-chevron-right"></i></a>
+    </div>
+</div>
+
+@foreach (var alert in d.BudgetAlerts)
+{
+    var exceeded = alert.Status == BudgetStatus.Exceeded;
+    <div class="alert @(exceeded ? "alert-danger" : "alert-warning") d-flex align-items-center" role="alert">
+        <i class="bi @(exceeded ? "bi-exclamation-octagon" : "bi-exclamation-triangle") me-2"></i>
+        <div>
+            <strong>@alert.CategoryName</strong>:
+            @alert.Spent.ToMoney() of @alert.MonthlyLimit.ToMoney() spent (@alert.PercentUsed.ToString("0.#")%).
+            @(exceeded ? "You're over budget." : "You're close to your limit.")
+            <a asp-controller="Budgets" asp-action="Index" class="alert-link ms-1">View budgets</a>
+        </div>
+    </div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card p-3 h-100">
+            <div class="stat-label">Spent this month</div>
+            <div class="stat-value amount">@d.TotalThisMonth.ToMoney()</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 h-100">
+            <div class="stat-label">Last month</div>
+            <div class="stat-value amount">@d.TotalLastMonth.ToMoney()</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 h-100">
+            <div class="stat-label">Change</div>
+            @if (d.ChangeFromLastMonthPercent is { } change)
+            {
+                <div class="stat-value @(change > 0 ? "text-danger" : "text-success")">
+                    <i class="bi @(change > 0 ? "bi-arrow-up-right" : "bi-arrow-down-right")"></i>
+                    @Math.Abs(change).ToString("0.#")%
+                </div>
+            }
+            else
+            {
+                <div class="stat-value text-muted">–</div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card p-3 h-100">
+            <h2 class="h6 mb-3">By category</h2>
+            @if (d.SpendingByCategory.Count == 0)
+            {
+                <p class="text-muted my-auto text-center">No expenses this month yet.
+                    <a asp-controller="Expenses" asp-action="Create">Add one</a>.</p>
+            }
+            else
+            {
+                <div style="position: relative; height: 260px"><canvas id="categoryChart" aria-label="Spending by category"></canvas></div>
+                <table class="table table-sm mt-3 mb-0">
+                    <tbody>
+                        @foreach (var c in d.SpendingByCategory)
+                        {
+                            <tr>
+                                <td><span class="category-dot" style="background:@c.Color"></span>
+                                    <a asp-controller="Expenses" asp-action="Index" asp-route-categoryId="@c.CategoryId"
+                                       asp-route-from="@month.ToString("yyyy-MM-dd")" asp-route-to="@month.AddMonths(1).AddDays(-1).ToString("yyyy-MM-dd")">@c.CategoryName</a></td>
+                                <td class="text-end amount">@c.Total.ToMoney()</td>
+                                <td class="text-end text-muted small">@c.Share.ToString("0.#")%</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card p-3 h-100">
+            <h2 class="h6 mb-3">Last @ReportService.TrendMonths months</h2>
+            <div style="position: relative; height: 320px"><canvas id="trendChart" aria-label="Monthly spending trend"></canvas></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            const currency = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
+            const byCategory = @Json.Serialize(d.SpendingByCategory);
+            const trend = @Json.Serialize(d.MonthlyTrend);
+
+            const categoryCanvas = document.getElementById('categoryChart');
+            if (categoryCanvas) {
+                new Chart(categoryCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: byCategory.map(c => c.categoryName),
+                        datasets: [{ data: byCategory.map(c => c.total), backgroundColor: byCategory.map(c => c.color) }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: ctx => `${ctx.label}: ${currency.format(ctx.parsed)}` } }
+                        }
+                    }
+                });
+            }
+
+            new Chart(document.getElementById('trendChart'), {
+                type: 'bar',
+                data: {
+                    labels: trend.map(m => m.label),
+                    datasets: [{ label: 'Spent', data: trend.map(m => m.total), backgroundColor: '#2f6f5e', borderRadius: 4 }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => currency.format(ctx.parsed.y) } } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: v => currency.format(v) } } }
+                }
+            });
+        })();
+    </script>
+}

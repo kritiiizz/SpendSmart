@@ -1,0 +1,52 @@
+@model BudgetFormViewModel
+@{
+    ViewData["Title"] = Model.IsEdit ? $"Edit budget: {Model.CategoryName}" : "New budget";
+}
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="card p-4">
+            <h1 class="h4 mb-3">@ViewData["Title"]</h1>
+            <form asp-action="Save" method="post">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CategoryName" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+
+                @if (Model.IsEdit)
+                {
+                    <input type="hidden" asp-for="CategoryId" />
+                }
+                else
+                {
+                    <div class="mb-3">
+                        <label asp-for="CategoryId" class="form-label"></label>
+                        <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select">
+                            <option value="">Choose…</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        @if (!Model.Categories.Any())
+                        {
+                            <div class="form-text">Every category already has a budget.</div>
+                        }
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label asp-for="MonthlyLimit" class="form-label"></label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input asp-for="MonthlyLimit" type="number" step="0.01" min="0.01" class="form-control" />
+                    </div>
+                    <span asp-validation-for="MonthlyLimit" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

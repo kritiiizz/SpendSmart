@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      microsoft:
+        patterns: ["Microsoft.*", "Npgsql.*"]
+      test-tools:
+        patterns: ["xunit*", "NSubstitute", "Testcontainers*", "coverlet*", "Microsoft.NET.Test.Sdk"]
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: monthly

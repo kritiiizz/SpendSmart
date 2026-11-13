@@ -1,0 +1,53 @@
+@model RecurringFormViewModel
+@{
+    ViewData["Title"] = "Add recurring expense";
+}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card p-4">
+            <h1 class="h4 mb-3">@ViewData["Title"]</h1>
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="Description" class="form-label"></label>
+                        <input asp-for="Description" class="form-control" placeholder="e.g. Rent, Netflix" maxlength="200" autofocus />
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="Amount" class="form-label"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input asp-for="Amount" type="number" step="0.01" min="0.01" class="form-control" />
+                        </div>
+                        <span asp-validation-for="Amount" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="CategoryId" class="form-label"></label>
+                        <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select">
+                            <option value="">Choose…</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="Frequency" class="form-label"></label>
+                        <select asp-for="Frequency" asp-items="Html.GetEnumSelectList<RecurrenceFrequency>()" class="form-select"></select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="StartDate" class="form-label"></label>
+                        <input asp-for="StartDate" type="date" class="form-control" />
+                        <span asp-validation-for="StartDate" class="text-danger small"></span>
+                    </div>
+                </div>
+                <p class="form-text mt-3">If the first payment is today or earlier, it's added to your expenses straight away.</p>
+                <div class="d-flex gap-2 mt-2">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

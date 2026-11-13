@@ -1,0 +1,58 @@
+@model BudgetsViewModel
+@{
+    ViewData["Title"] = "Budgets";
+    var monthName = new DateOnly(Model.Year, Model.Month, 1).ToString("MMMM yyyy", CultureInfo.InvariantCulture);
+}
+<div class="d-flex justify-content-between align-items-center mb-1">
+    <h1 class="h3 mb-0">Budgets</h1>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> New budget</a>
+</div>
+<p class="text-muted">Monthly limits for @monthName. You'll see a warning at 80% of a limit.</p>
+
+@if (Model.Budgets.Count == 0)
+{
+    <div class="card p-5 text-center text-muted">
+        <i class="bi bi-bullseye" style="font-size: 2.5rem"></i>
+        <p class="mt-2 mb-3">No budgets yet. Set a monthly limit for a category to get alerts.</p>
+        <div><a asp-action="Create" class="btn btn-primary">Create a budget</a></div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var b in Model.Budgets)
+        {
+            var (barClass, badgeClass, label) = b.Status switch
+            {
+                BudgetStatus.Exceeded => ("bg-danger", "text-bg-danger", "Over budget"),
+                BudgetStatus.Warning => ("bg-warning", "text-bg-warning", "Close to limit"),
+                _ => ("bg-success", "text-bg-success", "On track"),
+            };
+            <div class="col-md-6 col-xl-4">
+                <div class="card p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h2 class="h6 mb-1"><span class="category-dot" style="background:@b.CategoryColor"></span>@b.CategoryName</h2>
+                        <span class="badge @badgeClass">@label</span>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mt-2">
+                        <span class="amount">@b.Spent.ToMoney() of @b.MonthlyLimit.ToMoney()</span>
+                        <span>@b.PercentUsed.ToString("0.#")%</span>
+                    </div>
+                    <div class="progress my-2" style="height: .6rem" role="progressbar" aria-label="@b.CategoryName budget used"
+                         aria-valuenow="@Math.Min(100, b.PercentUsed)" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar @barClass" style="width: @Math.Min(100, b.PercentUsed).ToString(CultureInfo.InvariantCulture)%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <span class="small @(b.Remaining < 0 ? "text-danger" : "text-muted")">
+                            @(b.Remaining < 0 ? $"{(-b.Remaining).ToMoney()} over" : $"{b.Remaining.ToMoney()} left")
+                        </span>
+                        <span>
+                            <a asp-action="Edit" asp-route-id="@b.Id" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                            @await Html.PartialAsync("_ConfirmDelete", ("Budgets", b.Id, "this budget"))
+                        </span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

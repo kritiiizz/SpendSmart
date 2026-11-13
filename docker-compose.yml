@@ -1,0 +1,33 @@
+# One command to run the whole stack:  docker compose up --build
+# Then open http://localhost:8080 and click "Try the demo".
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: spendsmart
+      POSTGRES_USER: spendsmart
+      POSTGRES_PASSWORD: spendsmart
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spendsmart -d spendsmart"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Default: "Host=db;Port=5432;Database=spendsmart;Username=spendsmart;Password=spendsmart"
+      # Local-only key. In a real deployment, set this as a secret.
+      Jwt__SigningKey: "docker-compose-local-signing-key-0123456789abcdef"
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
