@@ -1,6 +1,6 @@
 # SpendSmart
 
-[![CI](https://github.com/<your-github-user>/SpendSmart/actions/workflows/ci.yml/badge.svg)](https://github.com/<your-github-user>/SpendSmart/actions/workflows/ci.yml)
+[![CI](https://github.com/kritiiizz/SpendSmart/actions/workflows/ci.yml/badge.svg)](https://github.com/kritiiizz/SpendSmart/actions/workflows/ci.yml)
 ![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791)
 
